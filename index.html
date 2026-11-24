@@ -1,0 +1,699 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Cek Keamanan Jurnal</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Lora:wght@500;600;700&display=swap">
+<script src="https://cdn.tailwindcss.com/3.4.17"></script>
+<style>
+/* Layout: satu kolom lebar 1120px di atas krem hangat; panel putih berpinggir lembut; hasil berwarna menurut nada risiko. */
+:root {
+  --bg: #F6F4EE; --surface: #FFFFFF; --surface-2: #FAF8F3; --ink: #1E1D1A; --muted: #6A675E; --line: #E3DFD3;
+  --accent: #17519B; --on-accent: #FFFFFF; --on-t: #FFFFFF;
+  --ok: #0B8457;   --ok-bg: #F0FAF5;   --ok-line: #A8E0C8;
+  --warn: #B45309; --warn-bg: #FFF6E8; --warn-line: #F2CC93;
+  --bad: #C0302A;  --bad-bg: #FEF0EE;  --bad-line: #F1B8B2;
+  --none: #4B5563; --none-bg: #F3F2EE; --none-line: #DAD6CA;
+  --font-display: 'Lora', Georgia, serif;
+  --font-body: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #12110F; --surface: #1B1A17; --surface-2: #211F1B; --ink: #ECE9E1; --muted: #A09C90; --line: #34312B;
+    --accent: #7FA8E8; --on-accent: #0B1220; --on-t: #0B0F14;
+    --ok: #4ADE9B;   --ok-bg: #0F241B;   --ok-line: #1F5A41;
+    --warn: #F5A94E; --warn-bg: #2A1E0D; --warn-line: #6A4A1B;
+    --bad: #FF8A80;  --bad-bg: #2B1514;  --bad-line: #6E2C28;
+    --none: #AEB6C2; --none-bg: #1D2026; --none-line: #363C46;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #12110F; --surface: #1B1A17; --surface-2: #211F1B; --ink: #ECE9E1; --muted: #A09C90; --line: #34312B;
+  --accent: #7FA8E8; --on-accent: #0B1220; --on-t: #0B0F14;
+  --ok: #4ADE9B;   --ok-bg: #0F241B;   --ok-line: #1F5A41;
+  --warn: #F5A94E; --warn-bg: #2A1E0D; --warn-line: #6A4A1B;
+  --bad: #FF8A80;  --bad-bg: #2B1514;  --bad-line: #6E2C28;
+  --none: #AEB6C2; --none-bg: #1D2026; --none-line: #363C46;
+  color-scheme: dark;
+}
+body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 14.5px; line-height: 1.6; margin: 0; }
+.wrap { max-width: 1120px; margin: 0 auto; padding-block: 28px 64px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+h1, h2, h3 { margin: 0; text-wrap: balance; }
+.serif { font-family: var(--font-display); }
+.mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.muted { color: var(--muted); }
+.eyebrow { font-size: 11px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 22px; }
+.panel + .panel, .stack > * + * { margin-top: 18px; }
+.g2 { display: grid; gap: 12px; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 680px) { .g2 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.tone-ok   { --t: var(--ok);   --tbg: var(--ok-bg);   --tline: var(--ok-line); }
+.tone-warn { --t: var(--warn); --tbg: var(--warn-bg); --tline: var(--warn-line); }
+.tone-bad  { --t: var(--bad);  --tbg: var(--bad-bg);  --tline: var(--bad-line); }
+.tone-none { --t: var(--none); --tbg: var(--none-bg); --tline: var(--none-line); }
+.tcard { background: var(--tbg); border: 1px solid var(--tline); border-radius: 14px; padding: 14px 16px; min-width: 0; }
+.tcard .tt { color: var(--t); }
+.pill { display: inline-flex; align-items: center; font-size: 12px; font-weight: 700; background: var(--t); color: var(--on-t); border-radius: 999px; padding: 3px 12px; white-space: nowrap; }
+.pill-soft { display: inline-flex; align-items: center; font-size: 12px; font-weight: 600; background: var(--surface-2); color: var(--ink); border: 1px solid var(--line); border-radius: 999px; padding: 2px 11px; white-space: nowrap; }
+.tile { background: var(--surface-2); border: 1px solid var(--line); border-radius: 14px; padding: 12px 16px; min-width: 0; overflow-wrap: anywhere; }
+.input { width: 100%; background: var(--surface-2); color: var(--ink); border: 1px solid var(--line); border-radius: 12px; padding: 11px 14px; font-size: 15px; font-family: var(--font-body); }
+.input::placeholder { color: var(--muted); opacity: .85; }
+.input:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent); }
+.btn { font-family: var(--font-body); font-size: 14px; font-weight: 600; border-radius: 12px; padding: 10px 18px; cursor: pointer; border: 1px solid var(--line); background: var(--surface-2); color: var(--ink); }
+.btn:hover:not(:disabled) { border-color: var(--accent); }
+.btn:disabled { opacity: .55; cursor: default; }
+.btn-primary { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+.btn-ghost { background: transparent; border-color: transparent; font-weight: 500; }
+.btn:focus-visible, summary:focus-visible, a:focus-visible, .sug:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+a.ext { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
+.bar { height: 12px; border-radius: 999px; background: color-mix(in srgb, var(--ink) 8%, transparent); overflow: hidden; }
+.bar > i { display: block; height: 100%; min-width: 14px; border-radius: 999px; background: var(--t); transition: width .35s ease; }
+.report { background: var(--surface-2); border: 1px solid var(--line); border-radius: 12px; padding: 16px; font-family: var(--font-mono); font-size: 12.5px; line-height: 1.65; white-space: pre; overflow: auto; max-height: 380px; margin: 0; }
+.tbl-wrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; min-width: 720px; }
+th { text-align: left; font-weight: 500; color: var(--muted); font-size: 13px; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+td { padding: 12px; vertical-align: top; border-bottom: 1px solid var(--line); font-size: 13.5px; overflow-wrap: anywhere; }
+tr:last-child td { border-bottom: none; }
+.sugbox { position: absolute; left: 0; right: 0; top: calc(100% + 6px); z-index: 20; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,.14); overflow: hidden; }
+.sug { display: block; width: 100%; text-align: left; background: transparent; color: var(--ink); border: 0; padding: 9px 14px; cursor: pointer; font-family: var(--font-body); font-size: 14px; }
+.sug[aria-selected="true"], .sug:hover { background: var(--surface-2); }
+.guide li { margin-bottom: 8px; }
+.toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(20px + env(safe-area-inset-bottom, 0px)); background: var(--ink); color: var(--bg); padding: 9px 16px; border-radius: 999px; font-size: 13.5px; z-index: 50; }
+@media (prefers-reduced-motion: reduce) { .bar > i { transition: none; } }
+</style>
+
+<div id="root"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/7.0.0/fuse.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+
+<script type="text/babel" data-presets="react">
+const { useState, useMemo, useEffect, useRef, useDeferredValue } = React;
+
+/* ================= Utilitas ================= */
+const norm = (s) => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '')
+  .toLowerCase().replace(/&/g, ' and ').replace(/[^a-z0-9]+/g, ' ').trim();
+const cleanIssn = (s) => String(s || '').replace(/[^0-9Xx]/g, '').toUpperCase();
+const fmtIssn = (s) => { const c = cleanIssn(s); return c.length === 8 ? c.slice(0, 4) + '-' + c.slice(4) : (s || ''); };
+const ISSN_RE = /^(?:(?:e-?|p-?)?issn)?\s*[:#]?\s*(\d{4})\s*[-–]?\s*(\d{3}[\dXx])$/i;
+function detect(q) {
+  const t = (q || '').trim();
+  if (!t) return { type: 'empty' };
+  const m = t.match(ISSN_RE);
+  if (m) return { type: 'issn', issn: (m[1] + m[2]).toUpperCase() };
+  const nq = norm(t);
+  return nq.replace(/ /g, '').length < 3 ? { type: 'short' } : { type: 'name', nq };
+}
+function issnValid(i) {
+  let sum = 0;
+  for (let k = 0; k < 7; k++) sum += (8 - k) * Number(i[k]);
+  const c = (11 - (sum % 11)) % 11;
+  return (c === 10 ? 'X' : String(c)) === i[7];
+}
+const bigrams = (s) => { const a = s.replace(/ /g, ''); const m = new Map(); for (let i = 0; i < a.length - 1; i++) { const g = a.slice(i, i + 2); m.set(g, (m.get(g) || 0) + 1); } return m; };
+function dice(a, b) {
+  if (a === b) return 1;
+  const la = a.replace(/ /g, '').length, lb = b.replace(/ /g, '').length;
+  if (la < 2 || lb < 2) return 0;
+  const A = bigrams(a), B = bigrams(b); let inter = 0;
+  for (const [g, c] of A) inter += Math.min(c, B.get(g) || 0);
+  return (2 * inter) / ((la - 1) + (lb - 1));
+}
+const nf = (n) => Number(n).toLocaleString('id-ID');
+const getJson = async (u) => { const r = await fetch(u); if (!r.ok) throw new Error(u); return r.json(); };
+const colRows = (j) => { const c = j.columns; return j.rows.map((r) => { const o = {}; for (let i = 0; i < c.length; i++) o[c[i]] = r[i]; return o; }); };
+const now = () => new Date().toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' });
+
+/* ================= Indeks & pencarian (Fuse.js) ================= */
+function buildIndex(d) {
+  const mk = (arr, f) => { arr.forEach((r) => { r._n = norm(f(r)); }); return arr.filter((r) => r._n); };
+  const sc = mk(d.scopus, (r) => r.title), disc = mk(d.disc, (r) => r.title);
+  const smById = new Map(), smIssn = new Map();
+  (d.scimago || []).forEach((r) => { smById.set(String(r.sourceId), r); String(r.issn || '').split(',').forEach((i) => { if (i.length === 8 && !smIssn.has(i)) smIssn.set(i, r); }); });
+  const pj = mk(d.pj, (r) => r.name), pp = mk(d.pp, (r) => r.name), hj = mk(d.hj, (r) => r.title);
+  const issnMap = (arr) => {
+    const m = new Map();
+    arr.forEach((r) => [r.issn, r.eissn].forEach((i) => {
+      const c = cleanIssn(i);
+      if (c.length === 8) { if (!m.has(c)) m.set(c, []); if (!m.get(c).includes(r)) m.get(c).push(r); }
+    }));
+    return m;
+  };
+  const discBySource = new Map(); disc.forEach((r) => { if (r.sourceId) discBySource.set(String(r.sourceId), r); });
+  const opt = { includeScore: true, threshold: 0.4, ignoreLocation: true, minMatchCharLength: 2, keys: ['_n'] };
+  return {
+    sc, disc, smById, smIssn, counts: { sm: smById.size, sc: sc.length, disc: disc.length, pj: pj.length, pp: pp.length, hj: hj.length },
+    scIssn: issnMap(sc), discIssn: issnMap(disc), hjIssn: issnMap(hj), discBySource,
+    fSc: new Fuse(sc, opt), fDisc: new Fuse(disc, opt), fPj: new Fuse(pj, opt), fPp: new Fuse(pp, opt), fHj: new Fuse(hj, opt),
+  };
+}
+function fuzzy(fuse, nq, label, limit = 6) {
+  return fuse.search(nq, { limit: 30 }).map((h) => {
+    const sim = dice(nq, h.item._n), exact = nq === h.item._n;
+    const level = exact || sim >= 0.85 ? 'strong' : sim >= 0.55 ? 'possible' : null;
+    return level ? { item: h.item, sim, exact, level, why: exact ? `${label} cocok persis` : `${label} mirip` } : null;
+  }).filter(Boolean).sort((a, b) => b.sim - a.sim).slice(0, limit);
+}
+const byIssn = (arr) => (arr || []).map((item) => ({ item, sim: 1, exact: true, level: 'strong', why: 'ISSN cocok' }));
+
+const FACTORS = {
+  hj: [60, 'Nama ada di daftar Hijacked Journal (situs tiruan)'],
+  pj: [70, 'Cocok dengan daftar Predatory Journal'],
+  pp: [50, 'Publisher cocok dengan daftar Predatory Publisher'],
+  disc: [45, 'Tercatat Scopus Discontinued'],
+  inactive: [25, 'Berstatus Inactive di Scopus'],
+  nosc: [30, 'Tidak ditemukan di Scopus Source List'],
+  similar: [10, 'Ada nama yang mirip dengan daftar predatory'],
+};
+
+function runCheck(ix, name, publisher) {
+  const nm = name.trim(), pb = publisher.trim();
+  const d = detect(nm);
+  const res = { name: nm, publisher: pb, mode: d.type, issn: d.issn || '', issnOk: d.type === 'issn' ? issnValid(d.issn) : null, at: now() };
+  let sc = [], disc = [], pj = [], hj = [];
+  if (d.type === 'issn') { sc = byIssn(ix.scIssn.get(d.issn)); disc = byIssn(ix.discIssn.get(d.issn)); hj = byIssn(ix.hjIssn.get(d.issn)); }
+  else if (d.type === 'name') {
+    sc = fuzzy(ix.fSc, d.nq, 'Nama jurnal'); disc = fuzzy(ix.fDisc, d.nq, 'Nama jurnal');
+    pj = fuzzy(ix.fPj, d.nq, 'Nama jurnal'); hj = fuzzy(ix.fHj, d.nq, 'Nama jurnal');
+  }
+  if (pb && sc.length) {
+    const np = norm(pb);
+    sc.forEach((h) => { h.pubOk = dice(np, norm(h.item.publisher)) >= 0.6; if (h.pubOk) h.why += ' + publisher cocok'; });
+    sc.sort((a, b) => (b.sim + (b.pubOk ? 0.1 : 0)) - (a.sim + (a.pubOk ? 0.1 : 0)));
+  }
+  const S = (a) => a.filter((h) => h.level === 'strong'), P = (a) => a.filter((h) => h.level === 'possible');
+  const primary = S(sc)[0] || null;
+  const discHit = S(disc)[0] || null;
+  const discRec = discHit ? discHit.item : (primary ? ix.discBySource.get(String(primary.item.sourceId)) || null : null);
+  const baseRec = primary ? primary.item : discRec;
+  let sm = null;
+  if (baseRec) sm = ix.smById.get(String(baseRec.sourceId)) || ix.smIssn.get(cleanIssn(baseRec.issn)) || ix.smIssn.get(cleanIssn(baseRec.eissn)) || null;
+  else if (d.type === 'issn') sm = ix.smIssn.get(d.issn) || null;
+  const pubQ = pb || (primary && primary.item.publisher) || (discRec && discRec.publisher) || '';
+  const pubFrom = pb ? 'diisi pengguna' : pubQ ? 'dari data Scopus' : '';
+  const pubN = norm(pubQ);
+  const pp = pubN.replace(/ /g, '').length >= 3 ? fuzzy(ix.fPp, pubN, 'Publisher') : [];
+  Object.assign(res, { sc, disc, pj, pp, hj, primary, discRec, pubQ, pubFrom, sm, smLoaded: ix.counts.sm > 0 });
+
+  const jr = d.type === 'issn' || d.type === 'name';
+  const scStatus = !jr ? 'Belum Diperiksa' : discRec ? 'Discontinued' : primary ? (primary.item.status || 'Active') : ix.counts.sc ? 'Tidak Ditemukan' : 'Tidak Termuat';
+  res.scStatus = scStatus;
+  const f = [];
+  const add = (k) => f.push({ pts: FACTORS[k][0], text: FACTORS[k][1] });
+  if (S(hj).length) add('hj');
+  if (S(pj).length) add('pj');
+  if (S(pp).length) add('pp');
+  if (discRec) add('disc'); else if (scStatus === 'Inactive') add('inactive'); else if (scStatus === 'Tidak Ditemukan') add('nosc');
+  const near = (arr) => arr.some((h) => h.level === 'possible' && h.sim >= 0.8);
+  if (!S(pj).length && !S(pp).length && !S(hj).length && (near(pj) || near(pp))) add('similar');
+  res.factors = f;
+  res.score = Math.min(100, f.reduce((a, x) => a + x.pts, 0));
+  res.level = res.score < 25 ? 'rendah' : res.score < 50 ? 'sedang' : res.score < 75 ? 'tinggi' : 'sangat tinggi';
+  const isBad = S(hj).length + S(pj).length + S(pp).length > 0;
+  const onlyHj = S(hj).length > 0 && !S(pj).length && !S(pp).length;
+  if (isBad) res.decision = onlyHj
+    ? { tone: 'tone-bad', title: 'WASPADA: JURNAL DIBAJAK', text: 'Nama ini ada di daftar hijacked journal. Jurnal aslinya mungkin sah, tetapi ada situs tiruan. Pastikan Anda memakai situs resmi (lihat URL asli di bawah) dan jangan mengirim naskah atau biaya ke situs tiruan.' }
+    : { tone: 'tone-bad', title: 'TERINDIKASI PREDATORY', text: 'Cocok dengan daftar predatory atau hijacked. Jangan submit sebelum Anda memverifikasi lewat sumber resmi.' };
+  else if (discRec) res.decision = { tone: 'tone-warn', title: 'SCOPUS DISCONTINUED', text: 'Jurnal pernah diindeks Scopus tetapi sudah dihentikan. Naskah baru tidak akan terindeks.' };
+  else if (scStatus === 'Active') res.decision = { tone: 'tone-ok', title: 'AMAN BERSYARAT', text: 'Boleh dipertimbangkan, tetapi verifikasi akhir di sumber resmi sebelum submit.' };
+  else if (scStatus === 'Inactive') res.decision = { tone: 'tone-warn', title: 'PERLU DICERMATI', text: 'Berstatus Inactive di Scopus: tidak lagi menerima konten baru. Pastikan jurnal masih menerbitkan dan terindeks.' };
+  else if (scStatus === 'Belum Diperiksa') res.decision = { tone: 'tone-none', title: 'BELUM TERVERIFIKASI', text: 'Hanya publisher yang diperiksa dan tidak cocok dengan daftar predatory. Isi nama jurnal atau ISSN untuk memeriksa status Scopus.' };
+  else res.decision = { tone: 'tone-none', title: 'BELUM TERVERIFIKASI', text: scStatus === 'Tidak Termuat' ? 'Data Scopus Source List belum termuat, jadi status indeksasi belum bisa diperiksa.' : 'Tidak ada di daftar predatory, tetapi juga tidak ditemukan di Scopus Source List. Belum dapat dipastikan aman.' };
+  return res;
+}
+
+/* ================= Laporan & jejak ================= */
+const QUARTILE_NOTE = 'Catatan: quartil dihitung dari Scimago, bukan dari Scopus. Info lebih lanjut: isi form pengecekan jurnal di https://bit.ly/Form_pengecekan (gunakan email cybercampus).';
+const CATS = { sc: 'Scopus', disc: 'Scopus Discontinued', pj: 'Predatory Journal', pp: 'Predatory Publisher', hj: 'Hijacked Journal' };
+function traceRows(res, counts) {
+  const rows = [];
+  const push = (k, arr) => arr.slice(0, 6).forEach((h) => rows.push({
+    sumber: k === 'sc' ? `Scopus ${h.item.status || ''}`.trim() : CATS[k], baris: counts[k], judul: h.item.title || h.item.name,
+    skor: Math.round(h.sim * 100), issn: [fmtIssn(h.item.issn), fmtIssn(h.item.eissn)].filter(Boolean).join(', '),
+    publisher: h.item.publisher || '', alasan: h.why, level: h.level, tone: k === 'sc' ? 'tone-none' : k === 'disc' ? 'tone-warn' : 'tone-bad',
+  }));
+  push('hj', res.hj); push('pj', res.pj); push('pp', res.pp); push('disc', res.disc); push('sc', res.sc);
+  return rows;
+}
+function buildReport(res, meta) {
+  const L = (k, v) => `${k.padEnd(26)}: ${v}`;
+  const rec = res.primary ? res.primary.item : res.discRec || {};
+  const lines = [
+    'HASIL PENGECEKAN JURNAL', `Dibuat ${res.at}`, '',
+    L('Nama jurnal', res.name || '-'), L('ISSN / E-ISSN', [fmtIssn(rec.issn), fmtIssn(rec.eissn)].filter(Boolean).join(' / ') || res.issn || '-'),
+    L('Publisher', rec.publisher || res.pubQ || '-'), '',
+    'Status sumber data:',
+    L('- Scopus', res.scStatus),
+    L('- Predatory Journal', res.pj.some((h) => h.level === 'strong') ? 'Ditemukan' : res.pj.length ? 'Ada yang mirip' : 'Tidak Ditemukan'),
+    L('- Predatory Publisher', res.pp.some((h) => h.level === 'strong') ? 'Ditemukan' : res.pp.length ? 'Ada yang mirip' : 'Tidak Ditemukan'),
+    L('- Hijacked Journal', res.hj.some((h) => h.level === 'strong') ? 'Ditemukan' : 'Tidak Ditemukan'),
+    '', 'Kuartil Scimago:',
+    L('- Kuartil terbaik', res.sm ? (res.sm.quartile === '-' ? 'Tanpa kuartil' : res.sm.quartile) : res.smLoaded ? 'Tidak ditemukan di Scimago' : 'Data Scimago belum dimuat'),
+  ];
+  if (res.sm) { lines.push(L('- SJR / H-index', `${res.sm.sjr == null ? '-' : res.sm.sjr} / ${res.sm.hIndex == null ? '-' : res.sm.hIndex}`)); if (res.sm.categories) lines.push(L('- Kategori', res.sm.categories)); }
+  lines.push(QUARTILE_NOTE);
+  if (res.discRec) lines.push('', 'Scopus Discontinued:', L('- Terakhir terindeks', `tahun ${res.discRec.lastYear || '-'}, vol ${res.discRec.lastVolume || '-'}, issue ${res.discRec.lastIssue || '-'}`), L('- Alasan', res.discRec.reason || res.discRec.change || '-'));
+  res.hj.filter((h) => h.level === 'strong').slice(0, 3).forEach((h) => lines.push('', 'Hijacked Journal:', L('- Nama dibajak', h.item.title), L('- Situs tiruan (jangan dipakai)', h.item.fakeUrl || '-'), L('- Jurnal asli', h.item.authenticTitle || '-'), L('- Situs asli', h.item.originalUrl || '-')));
+  lines.push('', `Skor risiko: ${res.score}/100 (${res.level})`);
+  res.factors.forEach((x) => lines.push(`- +${x.pts} ${x.text}`));
+  if (!res.factors.length) lines.push('- Tidak ada faktor risiko pada data yang dimuat');
+  lines.push('', 'Kesimpulan:', `${res.decision.title}. ${res.decision.text}`, '',
+    'Catatan: hasil ini skrining awal dari file lokal, bukan pengecekan real-time.',
+    'Konfirmasi di https://www.scopus.com/sources dan situs resmi jurnal sebelum submit.', '',
+    `Versi data: Scopus ${meta.scopus || '-'}; predatory ${meta.pred || '-'}.`);
+  return lines.join('\n');
+}
+function exportXlsx(res, report, rows, meta) {
+  const wb = XLSX.utils.book_new();
+  const rec = res.primary ? res.primary.item : res.discRec || {};
+  const sum = [['Hasil pengecekan jurnal', res.at], ['Nama jurnal', res.name], ['ISSN / E-ISSN', [fmtIssn(rec.issn), fmtIssn(rec.eissn)].filter(Boolean).join(' / ') || res.issn],
+    ['Publisher', rec.publisher || res.pubQ], ['Status Scopus', res.scStatus], ['Kuartil Scimago', res.sm ? res.sm.quartile : res.smLoaded ? 'Tidak ditemukan di Scimago' : 'Data belum dimuat'], ['SJR / H-index', res.sm ? `${res.sm.sjr == null ? '-' : res.sm.sjr} / ${res.sm.hIndex == null ? '-' : res.sm.hIndex}` : '-'], ['Catatan kuartil', QUARTILE_NOTE], ['Keputusan awal', res.decision.title], ['Skor risiko', `${res.score}/100 (${res.level})`], [],
+    ['Faktor skor', 'Poin'], ...res.factors.map((x) => [x.text, x.pts]), [], ['Catatan', 'Skrining awal dari file lokal. Konfirmasi di scopus.com/sources dan situs resmi jurnal.'], ['Versi data', `Scopus ${meta.scopus || '-'}; predatory ${meta.pred || '-'}`]];
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sum), 'Ringkasan');
+  const tr = [['Sumber', 'Judul / Nama', 'Skor', 'ISSN', 'Publisher', 'Alasan', 'Tingkat'], ...rows.map((r) => [r.sumber, r.judul, r.skor, r.issn, r.publisher, r.alasan, r.level === 'strong' ? 'kuat' : 'mirip'])];
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(tr), 'Jejak data');
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(report.split('\n').map((l) => [l])), 'Laporan');
+  return XLSX.write(wb, { type: 'array', bookType: 'xlsx' });
+}
+
+/* ================= Komponen ================= */
+function StatusCard({ title, badge, tone, line, sub }) {
+  return (
+    <div className={`tcard ${tone}`}>
+      <div className="flex items-start justify-between gap-3">
+        <h3 className="text-[15px] font-bold">{title}</h3>
+        <span className="pill">{badge}</span>
+      </div>
+      <p className="tt m-0 mt-1.5 text-[13.5px]">{line}</p>
+      <p className="muted m-0 text-[13px]">{sub}</p>
+    </div>
+  );
+}
+const Tile = ({ k, children }) => (
+  <div className="tile"><div className="eyebrow">{k}</div><div className="mt-0.5">{children || <span className="muted">&mdash;</span>}</div></div>
+);
+
+function SourceCard({ title, desc, info, onFile }) {
+  const id = 'f-' + title.replace(/\W+/g, '');
+  const ok = info && info.n > 0;
+  return (
+    <div className="tile" style={{ background: 'var(--surface)' }}>
+      <div className="flex items-start justify-between gap-3">
+        <h3 className="text-[15px] font-bold">{title}</h3>
+        <span className="pill-soft" style={{ color: ok ? 'var(--accent)' : 'var(--muted)' }}>{ok ? 'Termuat' : 'Kosong'}</span>
+      </div>
+      <p className="muted m-0 text-[13px]">{desc}</p>
+      <p className="m-0 mt-1 text-[13px] mono" style={{ color: ok ? 'var(--ok)' : 'var(--muted)' }}>{info ? `${nf(info.n)} baris • ${info.file} • ${info.origin}` : 'Memuat…'}</p>
+      <input id={id} type="file" accept=".json,application/json" className="input mt-2.5 text-[13px]" onChange={onFile} aria-label={`Muat file JSON untuk ${title}`} />
+    </div>
+  );
+}
+
+function App() {
+  const [data, setData] = useState(null);
+  const [info, setInfo] = useState({});
+  const [meta, setMeta] = useState({});
+  const [err, setErr] = useState('');
+  const [name, setName] = useState('');
+  const [pub, setPub] = useState('');
+  const [res, setRes] = useState(null);
+  const [busy, setBusy] = useState(false);
+  const [ix, setIx] = useState(null);
+  const [dl, setDl] = useState(null);
+  const [toast, setToast] = useState('');
+  const [sugOpen, setSugOpen] = useState(false);
+  const [sugI, setSugI] = useState(-1);
+  const inited = useRef(false);
+  const reportRef = useRef(null);
+  const dname = useDeferredValue(name);
+
+  const note = (t) => { setToast(t); setTimeout(() => setToast(''), 2200); };
+
+  const loadDefaults = async () => {
+    setIx(null); setErr('');
+    const d = { scopus: [], scimago: [], disc: [], pj: [], pp: [], hj: [] }, inf = {}, mt = {};
+    let db = null, dbFile = 'database.json', dbOrigin = 'bawaan';
+    try { db = await getJson('data/database.json'); } catch (e) {
+      try { db = await getJson('data/database.sample.json'); dbFile = 'database.sample.json'; dbOrigin = 'contoh'; } catch (e2) { setErr('File data/database.json tidak dapat dimuat.'); }
+    }
+    if (db) {
+      d.disc = db.scopusDiscontinued || []; d.pj = db.predatoryJournals || []; d.pp = db.predatoryPublishers || []; d.hj = db.hijackedJournals || [];
+      mt.pred = db.meta && db.meta.predatoryListVersion;
+      mt.scopus = db.meta && db.meta.scopusListVersion;
+      [['disc', d.disc], ['pj', d.pj], ['pp', d.pp], ['hj', d.hj]].forEach(([k, a]) => { inf[k] = { n: a.length, file: dbFile, origin: dbOrigin }; });
+    }
+    let scFile = 'scopus_sources.json', scOrigin = 'bawaan';
+    let sj = null;
+    try { sj = await getJson('data/scopus_sources.json'); } catch (e) {
+      try { sj = await getJson('data/scopus_sources.sample.json'); scFile = 'scopus_sources.sample.json'; scOrigin = 'contoh'; } catch (e2) { /* tanpa data Scopus */ }
+    }
+    if (sj) { d.scopus = colRows(sj); if (!mt.scopus && sj.meta) mt.scopus = sj.meta.version; }
+    let mj = null, mFile = 'scimago.json', mOrigin = 'bawaan';
+    try { mj = await getJson('data/scimago.json'); } catch (e) {
+      try { mj = await getJson('data/scimago.sample.json'); mFile = 'scimago.sample.json'; mOrigin = 'contoh'; } catch (e2) { /* tanpa data Scimago */ }
+    }
+    d.scimago = mj ? colRows(mj) : [];
+    if (mj && mj.meta) mt.sm = mj.meta.year;
+    inf.sm = { n: d.scimago.length, file: mj ? mFile : '-', origin: mj ? mOrigin : 'tidak termuat' };
+    inf.sc = { n: d.scopus.length, file: sj ? scFile : '-', origin: sj ? scOrigin : 'tidak termuat' };
+    setInfo(inf); setMeta(mt); setData(d);
+  };
+  useEffect(() => { loadDefaults(); }, []);
+
+  useEffect(() => {
+    if (!data) return;
+    const t = setTimeout(() => setIx(buildIndex(data)), 30);
+    return () => clearTimeout(t);
+  }, [data]);
+
+  useEffect(() => {
+    (async () => {
+      try { const d = window.claude && window.claude.use ? await window.claude.use('downloads') : null; setDl(d || null); } catch (e) { setDl(null); }
+    })();
+  }, []);
+
+  const exec = (n, p, index) => {
+    if (!n.trim() && !p.trim()) { setErr('Isi minimal nama jurnal atau publisher.'); return; }
+    const t = detect(n);
+    if (n.trim() && t.type === 'short' && !p.trim()) { setErr('Nama jurnal terlalu pendek. Ketik minimal 3 karakter.'); return; }
+    setErr(''); setBusy(true);
+    setTimeout(() => { try { setRes(runCheck(index, n, p)); } finally { setBusy(false); } }, 20);
+  };
+
+  useEffect(() => {
+    if (!ix || inited.current) return;
+    inited.current = true;
+    const ex = ix.sc.find((r) => r._n === 'nature') || ix.sc.find((r) => r.status === 'Active') || ix.disc[0];
+    if (ex) { setName(ex.title); setPub(''); exec(ex.title, '', ix); }
+  }, [ix]);
+
+  const sugs = useMemo(() => {
+    if (!ix || dname.trim().length < 2 || detect(dname).type === 'issn') return [];
+    const n = norm(dname); if (n.length < 2) return [];
+    const starts = [], has = [];
+    for (const r of ix.sc) {
+      const i = r._n.indexOf(n);
+      if (i === 0) { starts.push(r); if (starts.length >= 8) break; } else if (i > 0 && has.length < 8) has.push(r);
+    }
+    return [...starts, ...has].slice(0, 8);
+  }, [ix, dname]);
+
+  const pick = (r) => { setName(r.title); if (r.publisher) setPub(r.publisher); setSugOpen(false); setSugI(-1); };
+  const onKey = (e) => {
+    if (e.key === 'Escape') { setSugOpen(false); return; }
+    if (!sugOpen || !sugs.length) return;
+    if (e.key === 'ArrowDown') { e.preventDefault(); setSugI((i) => Math.min(sugs.length - 1, i + 1)); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); setSugI((i) => Math.max(0, i - 1)); }
+    else if (e.key === 'Enter' && sugI >= 0) { e.preventDefault(); pick(sugs[sugI]); }
+  };
+  const reset = () => { setName(''); setPub(''); setRes(null); setErr(''); setSugOpen(false); };
+
+  const onFile = (key) => (e) => {
+    const f = e.target.files && e.target.files[0]; if (!f) return;
+    const rd = new FileReader();
+    rd.onload = () => {
+      try {
+        const j = JSON.parse(rd.result);
+        const nd = { ...data };
+        if (key === 'sc' || key === 'sm') { if (!j.columns || !j.rows) throw new Error('fmt'); nd[key === 'sc' ? 'scopus' : 'scimago'] = colRows(j); }
+        else {
+          const arr = Array.isArray(j) ? j : j[{ disc: 'scopusDiscontinued', pj: 'predatoryJournals', pp: 'predatoryPublishers', hj: 'hijackedJournals' }[key]];
+          if (!Array.isArray(arr)) throw new Error('fmt'); nd[{ disc: 'disc', pj: 'pj', pp: 'pp', hj: 'hj' }[key]] = arr;
+        }
+        const n = key === 'sc' ? nd.scopus.length : key === 'sm' ? nd.scimago.length : nd[key].length;
+        setInfo((o) => ({ ...o, [key]: { n, file: f.name, origin: 'lokal' } }));
+        setData(nd); setRes(null); setErr('');
+      } catch (x) { setErr(`Format JSON untuk ${CATS[key] || (key === 'sm' ? 'Scimago' : 'Scopus')} tidak sesuai. Lihat contoh di data/database.sample.json.`); }
+    };
+    rd.readAsText(f); e.target.value = '';
+  };
+
+  const rows = useMemo(() => (res && ix ? traceRows(res, ix.counts) : []), [res, ix]);
+  const report = useMemo(() => (res ? buildReport(res, meta) : ''), [res, meta]);
+
+  const copy = async () => {
+    try { await navigator.clipboard.writeText(report); note('Laporan disalin'); }
+    catch (e) {
+      try { const r = document.createRange(); r.selectNodeContents(reportRef.current); const s = window.getSelection(); s.removeAllRanges(); s.addRange(r); note('Teks dipilih, tekan salin'); } catch (e2) { /* abaikan */ }
+    }
+  };
+  const download = async () => {
+    try {
+      const buf = exportXlsx(res, report, rows, meta);
+      const base = (res.name || res.pubQ || 'jurnal').replace(/[^\w\- ]+/g, '').trim().slice(0, 40) || 'jurnal';
+      await dl.save({ filename: `cek-jurnal-${base}.xlsx`, data: buf });
+      note('File Excel disimpan');
+    } catch (e) { if (!e || e.code !== 'declined') note('Gagal menyimpan Excel'); }
+  };
+
+  const tone = (hit, poss) => (hit ? 'tone-bad' : poss ? 'tone-warn' : 'tone-ok');
+  const strongOf = (a) => (a || []).filter((h) => h.level === 'strong');
+  const possOf = (a) => (a || []).filter((h) => h.level === 'possible');
+  const cardFor = (key, title, desc) => {
+    const empty = ix && ix.counts[key] === 0;
+    const s = strongOf(res[key]), p = possOf(res[key]);
+    if (empty) return <StatusCard title={title} badge="Data kosong" tone="tone-none" line="Belum ada entri pada data yang dimuat." sub={desc} />;
+    if (key === 'pp' && !res.pubQ) return <StatusCard title={title} badge="Belum diperiksa" tone="tone-none" line="Isi nama publisher atau pilih jurnal yang ada di Scopus." sub={desc} />;
+    if (s.length) return <StatusCard title={title} badge="Ditemukan" tone="tone-bad" line={`Cocok dengan: ${s[0].item.title || s[0].item.name}`} sub={desc} />;
+    if (p.length) return <StatusCard title={title} badge="Ada yang mirip" tone="tone-warn" line={`Mirip: ${p[0].item.title || p[0].item.name} (${Math.round(p[0].sim * 100)}%). Periksa manual.`} sub={desc} />;
+    return <StatusCard title={title} badge="Tidak Ditemukan" tone="tone-ok" line={`Tidak ditemukan pada daftar ${title.toLowerCase()}.`} sub={desc} />;
+  };
+
+  const rec = res ? (res.primary ? res.primary.item : res.discRec || null) : null;
+  const scTone = res ? ({ Active: 'tone-ok', Inactive: 'tone-warn', Discontinued: 'tone-warn' }[res.scStatus] || 'tone-none') : '';
+  const scLine = !res ? '' : res.scStatus === 'Discontinued'
+    ? `Terakhir terindeks tahun ${res.discRec.lastYear || '-'}, vol ${res.discRec.lastVolume || '-'}, issue ${res.discRec.lastIssue || '-'}.`
+    : res.scStatus === 'Active' ? `Terdeteksi aktif pada Scopus Source List. Cakupan: ${rec.coverage || '-'}.`
+    : res.scStatus === 'Inactive' ? `Tercatat Inactive. Cakupan: ${rec.coverage || '-'}.`
+    : res.scStatus === 'Tidak Termuat' ? 'Data Scopus Source List belum dimuat.'
+    : res.scStatus === 'Belum Diperiksa' ? 'Isi nama jurnal atau ISSN untuk memeriksa status Scopus.'
+    : possOf(res.sc).length ? `Tidak ada yang cocok persis. Mirip: ${possOf(res.sc)[0].item.title}.` : 'Tidak ada judul yang cocok pada Scopus Source List.';
+  const levelTone = !res ? '' : res.score < 25 ? 'tone-ok' : res.score < 50 ? 'tone-warn' : 'tone-bad';
+  const detName = detect(name).type;
+
+  return (
+    <main className="wrap">
+      <header className="flex items-baseline justify-between gap-3 flex-wrap" style={{ paddingBottom: 18, borderBottom: '1px solid var(--line)' }}>
+        <div className="serif text-[20px] font-semibold">Cek Jurnal</div>
+        <div className="muted text-[13px]">Scopus {meta.scopus || '–'} &middot; daftar predatory {meta.pred || '–'}</div>
+      </header>
+
+      <section className="pt-9 pb-6">
+        <div className="eyebrow">Skrining integritas jurnal</div>
+        <h1 className="serif text-[34px] sm:text-[44px] leading-[1.1] font-bold mt-2">Periksa keamanan jurnal sebelum Anda submit.</h1>
+        <p className="muted text-[16px] mt-3 mb-0 max-w-[62ch]">Skrining awal berbasis data: Scopus aktif dan discontinued, predatory journal, predatory publisher, dan hijacked journal, dari file yang Anda muat sendiri.</p>
+      </section>
+
+      <div className="stack">
+        <details className="panel guide" open>
+          <summary className="cursor-pointer text-[16px] font-bold">Panduan cek jurnal</summary>
+          <ol className="mt-4 pl-5 mb-0">
+            <li><strong>Isi identitas.</strong> Masukkan minimal nama jurnal atau publisher. Nomor ISSN juga bisa diketik di kolom nama jurnal. Saran judul muncul setelah 2 karakter.</li>
+            <li><strong>Jalankan pemeriksaan.</strong> Klik <strong>Cek jurnal sekarang</strong>. Gunakan <strong>Reset</strong> untuk menghapus isian dan hasil sebelum mengecek jurnal lain.</li>
+            <li><strong>Baca hasil dan buktinya.</strong> Periksa keputusan awal, status tiap sumber, dan tabel <strong>Jejak data</strong>. Cocokkan judul, publisher, dan ISSN dengan situs resmi jurnal agar tidak tertukar dengan jurnal bernama mirip.</li>
+            <li><strong>Simpan hasil.</strong> Gunakan <strong>Salin hasil</strong> untuk menyalin laporan atau <strong>Unduh Excel</strong> untuk menyimpannya.</li>
+          </ol>
+          <div style={{ borderTop: '1px solid var(--line)', marginTop: 14, paddingTop: 14 }}>
+            <div className="font-bold">Cara menafsirkan hasil</div>
+            <ul className="mt-2 pl-5 mb-0 muted">
+              <li><strong style={{ color: 'var(--ink)' }}>Scopus Active / Inactive / Discontinued:</strong> status menurut file yang dimuat, bukan pengecekan real-time. Konfirmasi di Scopus Sources sebelum submit.</li>
+              <li><strong style={{ color: 'var(--ink)' }}>Predatory Journal / Publisher:</strong> kecocokan perlu ditinjau lewat bukti. Tidak ditemukan di daftar bukan jaminan jurnal aman. Skor risiko adalah indikator skrining, bukan persentase kepastian jurnal predator.</li>
+              <li><strong style={{ color: 'var(--ink)' }}>Kuartil:</strong> dihitung dari Scimago (SJR), bukan dari Scopus. Satu jurnal bisa punya kuartil berbeda di tiap kategori; kuartil terbaik ditampilkan paling besar.</li>
+              <li><strong style={{ color: 'var(--ink)' }}>Data belum lengkap:</strong> periksa panel <strong style={{ color: 'var(--ink)' }}>Sumber data</strong>. Hasil yang belum dapat dipastikan bukan hasil aman.</li>
+            </ul>
+          </div>
+        </details>
+
+        <form className="panel" onSubmit={(e) => { e.preventDefault(); setSugOpen(false); if (ix) exec(name, pub, ix); }}>
+          <div className="flex items-start justify-between gap-3">
+            <div><div className="eyebrow">Cek jurnal</div><h2 className="text-[16px] font-bold">Data jurnal</h2></div>
+            <button type="button" className="btn btn-ghost" onClick={reset}>Reset</button>
+          </div>
+          <div className="g2 mt-4">
+            <div className="relative">
+              <label htmlFor="nm" className="block text-[13.5px] font-medium mb-1.5">Nama jurnal atau ISSN</label>
+              <input id="nm" className="input" value={name} autoComplete="off" spellCheck="false" placeholder="Nama lengkap jurnal atau 1234-5678"
+                onChange={(e) => { setName(e.target.value); setSugOpen(true); setSugI(-1); }} onFocus={() => setSugOpen(true)} onBlur={() => setTimeout(() => setSugOpen(false), 120)} onKeyDown={onKey}
+                role="combobox" aria-expanded={sugOpen && sugs.length > 0} aria-controls="sugs" aria-autocomplete="list" />
+              {sugOpen && sugs.length > 0 && (
+                <div className="sugbox" id="sugs" role="listbox">
+                  {sugs.map((r, i) => (
+                    <button type="button" key={r.sourceId + '-' + i} role="option" aria-selected={i === sugI} className="sug" onMouseDown={(e) => { e.preventDefault(); pick(r); }}>
+                      <span>{r.title}</span><span className="muted text-[12.5px]"> &middot; {r.publisher || 'publisher tidak tercatat'}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div>
+              <label htmlFor="pb" className="block text-[13.5px] font-medium mb-1.5">Publisher</label>
+              <input id="pb" className="input" value={pub} onChange={(e) => setPub(e.target.value)} autoComplete="off" spellCheck="false" placeholder="Nama penerbit (opsional)" />
+            </div>
+          </div>
+          <div className="flex flex-wrap items-center gap-3 mt-4">
+            <button type="submit" className="btn btn-primary" disabled={!ix || busy}>{busy ? 'Memeriksa…' : 'Cek jurnal sekarang'}</button>
+            <button type="button" className="btn" onClick={reset}>Reset</button>
+            {!ix && !err && <span className="muted text-[13px]">Menyiapkan indeks pencarian&hellip;</span>}
+            {ix && detName === 'issn' && <span className="muted text-[13px]">Terdeteksi sebagai nomor ISSN</span>}
+          </div>
+          {err && <p role="alert" className="m-0 mt-3 text-[13.5px]" style={{ color: 'var(--bad)' }}>{err}</p>}
+        </form>
+
+        {res && ix && (
+          <section className="panel" aria-live="polite">
+            <div className="flex items-start justify-between gap-3">
+              <div><div className="eyebrow">Hasil</div><h2 className="text-[18px] font-bold">Hasil pengecekan</h2></div>
+              <span className={`pill ${levelTone}`}>{res.score}/100</span>
+            </div>
+
+            <div className={`tcard ${res.decision.tone} mt-4`} style={{ padding: '18px 20px' }}>
+              <div className="eyebrow">Keputusan awal</div>
+              <div className="tt serif text-[28px] sm:text-[32px] font-bold leading-tight mt-1">{res.decision.title}</div>
+              <p className="m-0 mt-1 muted">{res.decision.text}</p>
+              <div className={`mt-4 ${levelTone}`}>
+                <div className="flex items-baseline justify-between gap-3 text-[13.5px]">
+                  <span className="muted">Skor risiko</span><span className="tt font-bold mono">{res.score}/100 &middot; Risiko {res.level}</span>
+                </div>
+                <div className="bar mt-1.5" role="img" aria-label={`Skor risiko ${res.score} dari 100`}><i style={{ width: Math.max(res.score, 3) + '%' }} /></div>
+              </div>
+              <ul className="m-0 mt-3 pl-5 text-[13px] muted">
+                {res.factors.length ? res.factors.map((x, i) => <li key={i}><span className="mono">+{x.pts}</span> {x.text}</li>) : <li>Tidak ada faktor risiko pada data yang dimuat.</li>}
+              </ul>
+            </div>
+
+            {res.issnOk === false && <p className="m-0 mt-3 text-[13.5px]" style={{ color: 'var(--warn)' }}>Digit pemeriksa ISSN tidak valid. Periksa kembali pengetikan nomornya.</p>}
+
+            <div className="g2 mt-4">
+              <StatusCard title="Scopus" badge={res.scStatus} tone={scTone} line={scLine} sub="Active / Inactive / Discontinued" />
+              {cardFor('pj', 'Predatory Journal', 'Daftar jurnal predator')}
+              {cardFor('pp', 'Predatory Publisher', res.pubQ ? `Publisher diperiksa: ${res.pubQ} (${res.pubFrom})` : 'Daftar publisher predator')}
+              {cardFor('hj', 'Hijacked Journal', 'Daftar jurnal yang situsnya ditiru')}
+            </div>
+
+            {res.discRec && (
+              <div className="tcard tone-warn mt-3">
+                <div className="eyebrow">Scopus Discontinued</div>
+                <p className="m-0 mt-1"><strong>Alasan:</strong> {res.discRec.reason || res.discRec.change || 'Tidak dirinci'}</p>
+                <p className="m-0 mt-0.5 mono text-[13px]">Tahun {res.discRec.lastYear || '-'} &middot; Vol. {res.discRec.lastVolume || '-'} &middot; Issue {res.discRec.lastIssue || '-'}{res.discRec.pages ? ` · Hlm. ${res.discRec.pages}` : ''}</p>
+              </div>
+            )}
+
+            {strongOf(res.hj).length > 0 && (
+              <div className="tcard tone-bad mt-3">
+                <div className="eyebrow">Hijacked Journal</div>
+                {strongOf(res.hj).slice(0, 3).map((h, i) => (
+                  <div key={i} className={i ? 'mt-3 pt-3' : 'mt-1'} style={i ? { borderTop: '1px solid var(--tline)' } : null}>
+                    <p className="m-0"><strong>Nama yang dibajak:</strong> {h.item.title}</p>
+                    {h.item.fakeUrl && <p className="m-0 mono text-[13px]" style={{ overflowWrap: 'anywhere' }}>Situs tiruan (jangan dipakai): {h.item.fakeUrl}</p>}
+                    {h.item.authenticTitle && <p className="m-0 mt-1"><strong>Jurnal asli:</strong> {h.item.authenticTitle}</p>}
+                    {h.item.originalUrl && <p className="m-0 mono text-[13px]" style={{ overflowWrap: 'anywhere' }}>Situs asli: {/^https:\/\//.test(h.item.originalUrl) ? <a className="ext" href={h.item.originalUrl} target="_blank" rel="noopener noreferrer">{h.item.originalUrl}</a> : h.item.originalUrl}</p>}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div className="tile mt-3">
+              <div className="flex items-start justify-between gap-3 flex-wrap">
+                <div className="eyebrow">Kuartil Scimago{meta.sm ? ` \u00b7 SJR ${meta.sm}` : ''}</div>
+                <a className="ext text-[13px]" href="https://www.scimagojr.com/journalsearch.php" target="_blank" rel="noopener noreferrer">Scimago &#8599;</a>
+              </div>
+              {res.sm ? (
+                <div className="mt-2">
+                  <div className="flex items-center gap-4 flex-wrap">
+                    <span className={`pill ${{ Q1: 'tone-ok', Q2: 'tone-ok', Q3: 'tone-warn', Q4: 'tone-warn' }[res.sm.quartile] || 'tone-none'}`} style={{ fontSize: 22, padding: '4px 18px' }}>{res.sm.quartile === '-' ? 'Tanpa kuartil' : res.sm.quartile}</span>
+                    <span className="muted text-[13.5px]">SJR <strong className="mono" style={{ color: 'var(--ink)' }}>{res.sm.sjr == null ? '\u2013' : Number(res.sm.sjr).toLocaleString('id-ID', { minimumFractionDigits: 3, maximumFractionDigits: 3 })}</strong></span>
+                    <span className="muted text-[13.5px]">H-index <strong className="mono" style={{ color: 'var(--ink)' }}>{res.sm.hIndex == null ? '\u2013' : res.sm.hIndex}</strong></span>
+                    {res.sm.country && <span className="muted text-[13.5px]">{res.sm.country}</span>}
+                  </div>
+                  {res.sm.categories && (
+                    <div className="flex flex-wrap gap-2 mt-3">{res.sm.categories.split('; ').map((c, i) => <span key={i} className="pill-soft">{c}</span>)}</div>
+                  )}
+                </div>
+              ) : (
+                <p className="muted m-0 mt-1">{res.smLoaded ? 'Jurnal ini tidak ditemukan di data Scimago. Kuartil tidak tersedia.' : 'Data Scimago belum dimuat. Lihat panel Sumber data.'}</p>
+              )}
+              <p className="m-0 mt-3 text-[13px]" style={{ borderTop: '1px solid var(--line)', paddingTop: 10 }}>
+                Quartil dihitung dari Scimago, bukan dari Scopus. Jika ingin info lebih lanjut, silakan mengisi form pengecekan jurnal pada link berikut:{' '}
+                <a className="ext" href="https://bit.ly/Form_pengecekan" target="_blank" rel="noopener noreferrer">https://bit.ly/Form_pengecekan</a>. Pengisian form harus menggunakan email cybercampus.
+              </p>
+            </div>
+
+            <div className="g2 mt-3">
+              <Tile k="ISSN / E-ISSN"><span className="mono">{[fmtIssn(rec && rec.issn), fmtIssn(rec && rec.eissn)].filter(Boolean).join(' / ') || res.issn}</span></Tile>
+              <Tile k="Publisher">{(rec && rec.publisher) || res.pubQ}</Tile>
+              <Tile k="Cakupan Scopus"><span className="mono">{rec && rec.coverage}</span></Tile>
+              <Tile k="Bidang">{rec && rec.areas}</Tile>
+            </div>
+
+            <div style={{ borderTop: '1px solid var(--line)', marginTop: 22, paddingTop: 18 }}>
+              <div className="flex items-center justify-between gap-3 flex-wrap">
+                <div className="eyebrow">Laporan teks &middot; siap disalin</div>
+                <div className="flex gap-2">
+                  <button type="button" className="btn" onClick={copy}>Salin hasil</button>
+                  {dl && typeof XLSX !== 'undefined' && <button type="button" className="btn" onClick={download}>Unduh Excel</button>}
+                </div>
+              </div>
+              <pre className="report mt-3" ref={reportRef} tabIndex={0}>{report}</pre>
+            </div>
+          </section>
+        )}
+
+        {res && ix && (
+          <section className="panel">
+            <div className="eyebrow">Bukti cocok</div>
+            <h2 className="text-[18px] font-bold">Jejak data</h2>
+            {rows.length === 0 ? <p className="muted mt-3 mb-0">Tidak ada baris yang cocok pada sumber yang dimuat.</p> : (
+              <div className="tbl-wrap mt-3">
+                <table>
+                  <thead><tr><th>Sumber</th><th>Judul</th><th>Skor</th><th>ISSN</th><th>Publisher</th><th>Alasan</th></tr></thead>
+                  <tbody>
+                    {rows.map((r, i) => (
+                      <tr key={i}>
+                        <td><span className={`pill ${r.tone}`}>{r.sumber}</span><div className="muted text-[12.5px] mt-1">{nf(r.baris)} baris</div></td>
+                        <td>{r.judul}</td>
+                        <td className="mono" style={{ color: r.level === 'strong' ? 'var(--ok)' : 'var(--warn)', fontWeight: 600 }}>{r.skor}</td>
+                        <td className="mono">{r.issn || '–'}</td>
+                        <td>{r.publisher || '–'}</td>
+                        <td><span className="pill-soft">{r.alasan}</span></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </section>
+        )}
+
+        <section className="panel">
+          <div className="flex items-start justify-between gap-3 flex-wrap">
+            <div><div className="eyebrow">Referensi</div><h2 className="text-[18px] font-bold">Sumber data</h2></div>
+            <button type="button" className="btn" onClick={loadDefaults}>Muat ulang data bawaan</button>
+          </div>
+          <div className="g2 mt-4">
+            <SourceCard title="Scopus Source List" desc="Judul aktif dan inactive (ext_list)." info={info.sc} onFile={onFile('sc')} />
+            <SourceCard title="Scimago (SJR)" desc="Kuartil dan SJR dari Scimago Journal Rank." info={info.sm} onFile={onFile('sm')} />
+            <SourceCard title="Scopus Discontinued" desc="Sheet Discontinued Titles ext_list." info={info.disc} onFile={onFile('disc')} />
+            <SourceCard title="Predatory Journal" desc="Daftar jurnal predator." info={info.pj} onFile={onFile('pj')} />
+            <SourceCard title="Predatory Publisher" desc="Daftar publisher predator." info={info.pp} onFile={onFile('pp')} />
+            <SourceCard title="Hijacked Journal" desc="Daftar jurnal yang situsnya ditiru (isi sendiri)." info={info.hj} onFile={onFile('hj')} />
+            <div className="tile" style={{ borderStyle: 'dashed', background: 'transparent' }}>
+              <h3 className="text-[15px] font-bold">Mengganti data</h3>
+              <p className="muted m-0 mt-1 text-[13px]">Unggah file JSON dengan struktur yang sama seperti file bawaan. Untuk mengubah Excel menjadi JSON, jalankan <span className="mono">tools/convert_xlsx.py</span>.</p>
+            </div>
+          </div>
+        </section>
+      </div>
+      {toast && <div className="toast" role="status">{toast}</div>}
+    </main>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+
+</body></html>

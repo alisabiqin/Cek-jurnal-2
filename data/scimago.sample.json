@@ -1,0 +1,4 @@
+{"meta":{"year":"CONTOH (data fiktif)","source":"contoh"},"columns":["sourceId","issn","title","type","sjr","quartile","hIndex","categories","areas","country"],"rows":[
+["99100001","11112228","Jurnal Contoh Ilmu Pendidikan","journal",0.412,"Q2",12,"Education (Q2)","Social Sciences","Indonesia"],
+["99100002","22223335,33334442","Contoh International Journal of Materials","journal",1.205,"Q1",48,"Materials Science (miscellaneous) (Q1); Polymers and Plastics (Q2)","Materials Science","Netherlands"]
+]}

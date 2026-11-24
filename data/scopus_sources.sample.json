@@ -1,0 +1,5 @@
+{"meta":{"version":"CONTOH (data fiktif)"},"columns":["sourceId","title","issn","eissn","status","publisher","coverage","openAccess","type","areas"],"rows":[
+["99100001","Jurnal Contoh Ilmu Pendidikan","11112228","","Active","Penerbit Contoh Nusantara","2018-2026","Unpaywall Open Access","Journal","Social Sciences"],
+["99100002","Contoh International Journal of Materials","22223335","33334442","Active","Fiktif Science Press","2015-2026","","Journal","Physical Sciences"],
+["99100003","Annals of Contoh Medicine","44445553","","Inactive","Fiktif Science Press","1990-2012","","Journal","Health Sciences"]
+]}

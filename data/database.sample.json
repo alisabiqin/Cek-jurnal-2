@@ -1,0 +1,60 @@
+{
+  "meta": {
+    "generatedAt": "2026-11-20",
+    "scopusListVersion": "CONTOH (data fiktif)",
+    "predatoryListVersion": "CONTOH (data fiktif)",
+    "note": "Semua entri di file ini fiktif. Ganti dengan database.json asli Anda (lihat tools/convert_xlsx.py)."
+  },
+  "scopusDiscontinued": [
+    {
+      "sourceId": "99000001",
+      "title": "Journal of Contoh Applied Sciences",
+      "issn": "1234-5679",
+      "eissn": "",
+      "publisher": "Contoh Academic Press",
+      "change": "Discontinuation",
+      "lastYear": 2019,
+      "lastVolume": "14",
+      "lastIssue": "3",
+      "pages": "201-215",
+      "reason": "Dihentikan dari indeksasi Scopus setelah re-evaluasi (publication concerns)."
+    },
+    {
+      "sourceId": "99000002",
+      "title": "Fiktif International Review of Management",
+      "issn": "2345-6786",
+      "eissn": "3456-7893",
+      "publisher": "Fiktif Publishing Group",
+      "change": "Journal change policy",
+      "lastYear": 2022,
+      "lastVolume": "8",
+      "lastIssue": "1",
+      "pages": "1-12",
+      "reason": "Indeksasi dihentikan karena perubahan kebijakan jurnal."
+    }
+  ],
+  "predatoryJournals": [
+    {
+      "name": "Global Journal of Imaginary Research"
+    }
+  ],
+  "predatoryPublishers": [
+    {
+      "name": "Rapid Fiktif Publishers"
+    },
+    {
+      "name": "Omni Contoh Press"
+    }
+  ],
+  "hijackedJournals": [
+    {
+      "title": "Jurnal Palsu Teknologi Nusantara",
+      "issn": "4567-8902",
+      "eissn": "",
+      "fakeUrl": "jurnal-palsu-contoh.example",
+      "originalUrl": "jurnal-asli-contoh.example",
+      "note": "Situs web tiruan yang meniru jurnal asli dengan ISSN yang sama.",
+      "authenticTitle": "Jurnal Teknologi Nusantara (asli)"
+    }
+  ]
+}
